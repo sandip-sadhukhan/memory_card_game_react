@@ -2,7 +2,7 @@
   "name": "memeory-card-game",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://sandippakhanna.github.io",
+  "homepage": "https://sandippakhanna.github.io/memory_card_game_react/",
   "dependencies": {
     "@chakra-ui/react": "^1.8.6",
     "@emotion/react": "11",
