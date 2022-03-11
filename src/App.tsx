@@ -1,98 +1,138 @@
 import React, { MouseEvent, useState } from "react";
 import {
-  Divider,
-  Button,
-  HStack,
   VStack,
   Container,
   Heading,
-  Box,
-  Text,
-  Progress,
   SimpleGrid,
   Image,
-  Center,
 } from "@chakra-ui/react";
 import Header from "./components/Header";
 import Score from "./components/Score";
+import CopyRight from "./components/CopyRight";
+
+const TOTAL_CELLS: number = 16;
 
 const App: React.FC = () => {
-  const [cardState, setCardState] = useState([
-    {
-      card: 0,
-      open: false,
-    },
-    {
-      card: 1,
-      open: false,
-    },
-    {
-      card: 2,
-      open: true,
-    },
-    {
-      card: 3,
-      open: false,
-    },
-    {
-      card: 4,
-      open: true,
-    },
-    {
-      card: 5,
-      open: false,
-    },
-    {
-      card: 6,
-      open: false,
-    },
-    {
-      card: 7,
-      open: false,
-    },
-    {
-      card: 8,
-      open: false,
-    },
-    {
-      card: 9,
-      open: false,
-    },
-    {
-      card: 10,
-      open: false,
-    },
-    {
-      card: 11,
-      open: false,
-    },
-    {
-      card: 12,
-      open: false,
-    },
-    {
-      card: 13,
-      open: false,
-    },
-    {
-      card: 15,
-      open: false,
-    },
-    {
-      card: 16,
-      open: false,
-    },
-  ]);
+  /*
+    This 'state' variable represent what the current
+    state of a specific state type.
+    "show" means card content(emoji) is visible
+    "hidden" means it is not visible (react logo is shown)
+    "matched" means user matched the 2 cells
+  */
+  type state = "show" | "hidden" | "matched";
 
-  // setTimeout(() => {
-  //   let newCardState = [...cardState];
-  //   newCardState[0] = {
-  //     card: 0,
-  //     open: true,
-  //   };
-  //   setCardState(newCardState);
-  // }, 2000);
+  // This interface hold the information about a perticular cell with an unique id
+  interface CellType {
+    id: number;
+    state: state;
+    emoji: string;
+  }
 
+  const emojiList: string[] = [
+    "🐱",
+    "🐗",
+    "🐷",
+    "🐭",
+    "😨",
+    "🤡",
+    "🐺",
+    "🦍",
+    "😸",
+    "😹",
+    "😻",
+    "😺",
+    "😾",
+    "🙀",
+    "🥝",
+    "🪁",
+    "🤯",
+    "🎤",
+    "🗂️",
+    "🥙",
+  ];
+
+  // const getSingleRandomEmoji = (): string => {
+  //   let length: number = emojiList.length;
+  //   let randomEmoji: string = emojiList[Math.floor(Math.random() * length)];
+  //   return randomEmoji;
+  // };
+
+  const shuffleArray = (array: number[]): number[] => {
+    let currentIndex = array.length,
+      randomIndex;
+
+    // while there remain elements to shuffle
+    while (currentIndex !== 0) {
+      // Pick a remaining element
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      // And swap it with the current element
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex],
+        array[currentIndex],
+      ];
+    }
+    return array;
+  };
+
+  // it will generate a unique list of items from a list
+  // totalLength -> 20 means [0, 1, 2, ..., 19]
+  // length -> 8 means [8 unique elements from totalLengthArr]
+  const generateUniqueRandomNumbers = (
+    length: number,
+    totalLength: number
+  ): number[] => {
+    let randomNumbers: number[] = [];
+
+    while (randomNumbers.length < length * 2) {
+      let randomNumber: number = Math.floor(Math.random() * totalLength);
+      if (!randomNumbers.includes(randomNumber)) {
+        // add twice as a pair
+        randomNumbers.push(randomNumber);
+        randomNumbers.push(randomNumber);
+      }
+    }
+
+    // mix those list
+    let mixedNumbers: number[] = shuffleArray(randomNumbers);
+
+    return mixedNumbers;
+  };
+
+  const getAllEmojis = (totalCells: number): CellType[] => {
+    let totalPairs: number = totalCells / 2;
+    let randomNumbers = generateUniqueRandomNumbers(
+      totalPairs,
+      emojiList.length
+    );
+    let randomEmojiList: string[] = randomNumbers.map((num: number) => {
+      return emojiList[num];
+    });
+
+    let cells: CellType[] = randomEmojiList.map(
+      (emoji: string, index: number) => {
+        return {
+          id: index,
+          state: "hidden",
+          emoji,
+        };
+      }
+    );
+    return cells;
+  };
+
+  const [cellsState, setCellsState] = useState<CellType[]>(
+    getAllEmojis(TOTAL_CELLS)
+  );
+
+  // reset game
+  const resetGame = () => {
+    alert("Resetting the game...");
+  };
+
+  // onclick event on cell grid
   const onClick = (e: MouseEvent<HTMLDivElement>) => {
     let element = e.currentTarget;
     if (element.classList.contains("card")) {
@@ -107,20 +147,17 @@ const App: React.FC = () => {
   return (
     <Container maxW="container.sm" p={[2, 2, 2, 4, 6]} my={[2, 2, 2, 4, 4]}>
       {/* Header Section */}
-      <Header />
+      <Header resetGame={resetGame} />
 
       {/* Score Section */}
-      <Score />
+      <Score totalCells={TOTAL_CELLS} pairsMatched={6} totalMoves={0} />
 
       {/* Card Grid */}
       <SimpleGrid columns={[2, 2, 2, 4, 4]} spacing={4} w="full">
-        {cardState.map((card) => (
+        {cellsState.map((cell: CellType) => (
           <VStack
             h="105px"
-            key={card.card}
-            bgColor="#48565B"
-            border="2px solid #7E878B"
-            borderRadius={5}
+            key={cell.id}
             w="full"
             alignItems="center"
             justifyContent="center"
@@ -132,6 +169,9 @@ const App: React.FC = () => {
               className="front"
               w="full"
               h="full"
+              bgColor="#48565B"
+              border="2px solid #7E878B"
+              borderRadius={5}
               alignItems="center"
               justifyContent="center"
             >
@@ -141,22 +181,20 @@ const App: React.FC = () => {
               className="back"
               w="full"
               h="98%"
-              bgColor="green.800"
+              bgColor="#083532"
+              border="2px solid teal"
+              borderRadius={5}
               alignItems="center"
               justifyContent="center"
             >
-              <Heading>{card.card}</Heading>
+              <Heading size="3xl">{cell.emoji}</Heading>
             </VStack>
           </VStack>
         ))}
       </SimpleGrid>
 
       {/* CopyRight Text */}
-      <Center>
-        <Text color="gray.600" pt={4} fontSize={14}>
-          Made with 💝 by Sandip Sadhukhan.
-        </Text>
-      </Center>
+      <CopyRight text="Made with 💝 by Sandip Sadhukhan." />
     </Container>
   );
 };

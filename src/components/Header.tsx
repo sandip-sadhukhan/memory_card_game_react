@@ -8,7 +8,11 @@ import {
   useBreakpointValue,
 } from "@chakra-ui/react";
 
-const Header = () => {
+interface HeaderProps {
+  resetGame: () => void;
+}
+
+const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
   return (
     <VStack w="full" align="start" alignItems="center">
       <HStack
@@ -25,6 +29,7 @@ const Header = () => {
         <Button
           colorScheme="teal"
           size={useBreakpointValue({ base: "sm", md: "md" })}
+          onClick={props.resetGame}
         >
           Reset game
         </Button>
