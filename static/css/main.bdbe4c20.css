@@ -1,0 +1,2 @@
+.card{cursor:pointer;-webkit-transform-style:preserve-3d;transform-style:preserve-3d;transition:-webkit-transform .5s;transition:transform .5s;transition:transform .5s,-webkit-transform .5s}.back,.front{-webkit-backface-visibility:hidden;backface-visibility:hidden;position:absolute}.back{top:-6px;-webkit-transform:rotateY(180deg);transform:rotateY(180deg)}
+/*# sourceMappingURL=main.bdbe4c20.css.map*/
