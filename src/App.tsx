@@ -1,4 +1,4 @@
-import React, { MouseEvent, useState } from "react";
+import React, { useState } from "react";
 import {
   VStack,
   Container,
@@ -24,10 +24,11 @@ const App: React.FC = () => {
 
   // This interface hold the information about a perticular cell with an unique id
   interface CellType {
-    id: number;
     state: state;
     emoji: string;
   }
+
+  type CellsMap = Map<number, CellType>;
 
   const emojiList: string[] = [
     "🐱",
@@ -51,12 +52,6 @@ const App: React.FC = () => {
     "🗂️",
     "🥙",
   ];
-
-  // const getSingleRandomEmoji = (): string => {
-  //   let length: number = emojiList.length;
-  //   let randomEmoji: string = emojiList[Math.floor(Math.random() * length)];
-  //   return randomEmoji;
-  // };
 
   const shuffleArray = (array: number[]): number[] => {
     let currentIndex = array.length,
@@ -101,7 +96,7 @@ const App: React.FC = () => {
     return mixedNumbers;
   };
 
-  const getAllEmojis = (totalCells: number): CellType[] => {
+  const getAllEmojis = (totalCells: number): CellsMap => {
     let totalPairs: number = totalCells / 2;
     let randomNumbers = generateUniqueRandomNumbers(
       totalPairs,
@@ -111,19 +106,17 @@ const App: React.FC = () => {
       return emojiList[num];
     });
 
-    let cells: CellType[] = randomEmojiList.map(
-      (emoji: string, index: number) => {
-        return {
-          id: index,
-          state: "hidden",
-          emoji,
-        };
-      }
-    );
-    return cells;
+    let cellsMap: CellsMap = new Map<number, CellType>();
+    randomEmojiList.forEach((emoji: string, index: number) => {
+      cellsMap.set(index, {
+        state: "hidden",
+        emoji,
+      });
+    });
+    return cellsMap;
   };
 
-  const [cellsState, setCellsState] = useState<CellType[]>(
+  const [cellsState, setCellsState] = useState<CellsMap>(
     getAllEmojis(TOTAL_CELLS)
   );
 
@@ -133,15 +126,19 @@ const App: React.FC = () => {
   };
 
   // onclick event on cell grid
-  const onClick = (e: MouseEvent<HTMLDivElement>) => {
-    let element = e.currentTarget;
-    if (element.classList.contains("card")) {
-      if (element.style.transform === "rotateY(180deg)") {
-        element.style.transform = "rotateY(0deg)";
-      } else {
-        element.style.transform = "rotateY(180deg)";
-      }
+  const onClick = (cellId: number) => {
+    // get the current cell
+    let cell = cellsState.get(cellId) as CellType;
+    // flip the card
+    if (cell.state === "hidden") {
+      cell.state = "show";
+    } else if (cell.state === "show") {
+      cell.state = "hidden";
     }
+    // update the state
+    let newCellsState = new Map(cellsState);
+    newCellsState.set(cellId, cell);
+    setCellsState(newCellsState);
   };
 
   return (
@@ -154,16 +151,19 @@ const App: React.FC = () => {
 
       {/* Card Grid */}
       <SimpleGrid columns={[2, 2, 2, 4, 4]} spacing={4} w="full">
-        {cellsState.map((cell: CellType) => (
+        {Array.from(cellsState).map(([id, cell]) => (
           <VStack
             h="105px"
-            key={cell.id}
+            key={id}
             w="full"
             alignItems="center"
             justifyContent="center"
             shadow="sm"
             className="card"
-            onClick={onClick}
+            onClick={() => onClick(id)}
+            transform={
+              cell.state === "hidden" ? "rotateY(0deg)" : "rotateY(180deg)"
+            }
           >
             <VStack
               className="front"
