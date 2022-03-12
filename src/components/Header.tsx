@@ -10,6 +10,7 @@ import {
 
 interface HeaderProps {
   resetGame: () => void;
+  gameOver: boolean;
 }
 
 const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
@@ -31,7 +32,7 @@ const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
           size={useBreakpointValue({ base: "sm", md: "md" })}
           onClick={props.resetGame}
         >
-          Reset game
+          {props.gameOver ? "Play again" : "Reset game"}
         </Button>
       </HStack>
       <VStack w="full">
